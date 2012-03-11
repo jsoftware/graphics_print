@@ -530,7 +530,7 @@ case. 'printfile2' do.
   P2UP=: 1
 end.
 printform''
-wdloop^:(-.IFJ6)''
+evtloop^:(-.IFJ6)''
 )
 printclose=: 3 : 0
 wd 'pclose'
