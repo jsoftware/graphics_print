@@ -246,7 +246,7 @@ y=. getfile y
 for_f. y do.
   try. 1!:1 f
   catch.
-    empty wdinfo 'print' ; 'file not found: ' , >f return.
+    empty sminfo 'print' ; 'file not found: ' , >f return.
   end.
   PRINTFILES=: PRINTFILES,y
 end.
@@ -381,7 +381,7 @@ if. #y do.
   opts=. ((tolower@{. ; }.@}.)~ i.&' ')&> opts
   try. ({."1 opts)=. {:"1 opts
   catch.
-    wdinfo 'Print';'Error in print options' return.
+    sminfo 'Print';'Error in print options' return.
   end.
 end.
 
