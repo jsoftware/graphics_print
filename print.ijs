@@ -264,7 +264,7 @@ glwindowext (<0;2 3){PRINTPAGE
 wd'pshow'
 glpaint ''
 )
-printers=: }: @ wd bind 'qprinters'
+printers=: }: @ wdqprinters
 removetag=: 3 : 0
 r=. ''
 while. 1 e. b=. +./ E.&y &> TAGS do.
@@ -530,7 +530,7 @@ case. 'printfile2' do.
   P2UP=: 1
 end.
 printform''
-evtloop^:(-.IFJ6)''
+evtloop''
 )
 printclose=: 3 : 0
 wd 'pclose'
