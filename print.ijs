@@ -570,7 +570,7 @@ case. 1 do.
   bufexe 0 pick PCMDS
   PCMDS=: }. PCMDS
 case. 2 do.
-  wd 'mb Print *Printer banding not supported'
+  wdinfo 'Print';'Printer banding not supported'
 end.
 )
 place=: 3 : 0
