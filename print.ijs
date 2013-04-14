@@ -1,14 +1,14 @@
-require 'gl2'
+require 'ide/qt'
 
 coclass 'jprint'
-coinsert 'jgl2'
+coinsert 'qtprinter'
 
 PATHSEP=: '/'
-PRINTERFONT=: '"Courier New" 12'
-P2UPFONT=: '"Courier New" 7.5 bold'
+PRINTERFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 12' ; '"Lucida Grande" 12' ; (IFQT{::'Serif 12';'"Droid Serif" 12') ; 'Courier New 12'
+P2UPFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7.5 bold' ; '"Lucida Grande" 7.5 bold' ; (IFQT{::'Serif 7.5 bold';'"Droid Serif" 7.5 bold') ; 'Courier New 7.5 bold'
 PRINTOPT=: ''
-DEFFONT=: '"courier new" 10 bold'
-DEFFONT2=: '"courier new" 7 bold'
+DEFFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 10 bold' ; '"Lucida Grande" 10 bold' ; (IFQT{::'Serif 10 bold';'"Droid Serif" 10 bold') ; 'Courier New 10 bold'
+DEFFONT2=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7 bold' ; '"Lucida Grande" 7 bold' ; (IFQT{::'Serif 7 bold';'"Droid Serif" 7 bold') ; 'Courier New 7 bold'
 TOPM=: 0.4
 BOTM=: 0.75
 FOOTM=: 0.4
@@ -18,333 +18,418 @@ TOPM2=: 0.015
 BOTM2=: 0.03
 LEFTM2=: 0.015
 FOOTM2=: 0.015
-TAB=: 9 { a.
-TAGS=: '<b>';'</b>';'<i>';'</i>'
-TAGIDS=: ;:'bold nobold italic noitalic'
-BLACK=: 0
-WHITE=: <:2^24
-
-deb=: #~ (+. 1: |. (> </\))@(' '&~:)
-dlb=: }.~ =&' ' i. 0:
-dltb=: #~ [: (+./\ *. +./\.) ' '&~:
-dtb=: #~ [: +./\. ' '&~:
-round=: [ * [: <. 0.5"_ + %~
-rnd0=: <.@(0.5&+)
-tolist=: }.@;@:(LF&,@,@":&.>)
-boxascii=: 3 : 0
-y=. ": y
-to=. '+++++++++|-'
-fm=. 9!:6 ''
-(to,a.) {~ (fm,a.) i. y
+SCALE=: 1 1
+OFFSET=: 0 0
+bufinit=: 3 : 0
+PCMDS=: ''
+PCMD=: i.0 2
 )
-unibox=: 3 : 0
-fm=. (16+i.11) { a.
-msk=. y e. fm
-if. -. 1 e. msk do. utf8 y return. end.
-to=. 4 u: 9484 9516 9488 9500 9532 9508 9492 9524 9496 9474 9472
-y=. ucp y
-msk=. y e. fm
-un=. to {~ fm i. msk#y
-utf8 un (I.msk) } y
-)
-boxfont=: 3 : 0
-font=. ' ',y
-b=. (font=' ') > ~:/\font='"'
-a: -.~ b <;._1 font
-)
-changefont=: 4 : 0
-font=. ' ',x
-b=. (font=' ') > ~:/\font='"'
-font=. a: -.~ b <;._1 font
-opt=. y
-if. 0=L. opt do. opt=. cutopen ":opt end.
-opt=. a: -.~ (-.&' ' @ ":) each opt
-num=. _1 ~: _1 ". &> opt
-if. 1 e. num do.
-  font=. ({.num#opt) 1} font
-  opt=. (-.num)#opt
-end.
-ayes=. ;:'bold italic'
-noes=. ;:'nobold noitalic'
-font=. font , opt -. noes
-font=. font -. (noes e. opt)#ayes
-}: ; ,&' ' each ~. font
-)
-changetag=: 4 : 0
-x changefont TAGIDS {~ TAGS i. boxopen y
-)
-cleanup=: 3 : 0
-y=. flatten y
-toJ ' ' (I. y e. 27{a.) } y
-)
-cutpara=: 3 : 0
-txt=. topara y
-txt=. txt,(LF ~: {:txt)#LF
-b=. (}.b,0) < b=. txt=LF
-b <;._2 txt
-)
-dq=: 3 : 0
-y=. ": y
-if. '"' ~: {. y do.
-  '"',(y #~ >: y = '"'),'" '
+buf=: 3 : 0
+if. y -: 'page' do.
+  PCMDS=: PCMDS,<PCMD
+  PCMD=: i. 0 2
 else.
-  y,' '
+  PCMD=: PCMD, y
+end.
+empty''
+)
+bufexe=: 3 : 0
+for_d. y do.
+  'f v'=. d
+  f~v
 end.
 )
-emptymatrix=: ,:`empty @. (0:=#)
-fitchars=: 4 : 0
-
-fit=. {. @ glqextent @ ({.&y)
-max=. #y
-avg=. 5{ glqtextmetrics''
-
-try=. max <. >. x % avg
-if. x > fit try do.
-  while.
-    (max > try) *. x >: fit >: try
-  do. try=. >: try end.
+vfont=: 3 : 0
+glzfont TFONT=: y
+buf 'glzfont';TFONT
+)
+vlines=: 3 : 0
+buf 'glzlines';<. , SCALE * OFFSET + _2]\y
+)
+vpage=: 3 : 0
+buf 'page'
+)
+vpen=: 3 : 0
+buf 'glzpen';y
+)
+vtext=: 3 : 0
+buf 'glztext';unibox y
+)
+vtextcolor=: 3 : 0
+if. #y do.
+  clr=. 256 256 256 #: y
 else.
-  while.
-    (0 < try) *. x < fit try
-  do. try=. <: try end.
+  clr=. 0 0 0
 end.
-try, fit try
+buf 'glzrgb';clr
+buf 'glztextcolor';''
 )
-fitline=: 4 : 0
-wid=. x
-txt=. y
-b=. +./ E.&txt &> TAGS
-if. -. 1 e. b do.
-  num=. wid fitwords txt
-  if. 0={.num do.
-    num=. wid fitchars txt
-  end.
-  return.
+vtextxy=: 3 : 0
+buf 'glztextxy';<. SCALE * OFFSET + y
+)
+printit=: 4 : 0
+bufinit''
+PRINTFILES=: ''
+PRINTFILE=: ''
+P2UP=: 0
+PRINTOPT=: 0 pick x
+select. 1 pick x
+case. 'print' do.
+  PRINTTXT=: y
+  printform 0
+case. 'print2' do.
+  PRINTTXT=: y
+  P2UP=: 1
+  printform 0
+case. 'printfile' do.
+  getprintfiles y
+  printform 1
+case. 'printfile2' do.
+  getprintfiles y
+  P2UP=: 1
+  printform 1
 end.
-tnum=. tlen=. 0
-
-while. 1 do.
-  ndx=. b i. 1
-
-  if. ndx>0 do.
-    'num len'=. wid fitwords ndx{.txt
-
-    tnum=. tnum + num
-    tlen=. tlen + len
-
-    if. num<ndx do.
-      if. 0=tnum do.
-        wid fitchars txt
-      else.
-        tnum,tlen
+)
+printclose=: 3 : 0
+if. #PRINTFILES do.
+  PRINTFILE=: 0 pick PRINTFILES
+  PRINTFILES=: }. PRINTFILES
+else.
+  codestroy''
+end.
+)
+printform=: 3 : 0
+prnfile=. y
+if. 0 e. $opt=. P2UP printopts PRINTOPT do. 1 return. end.
+'Ascii Cols Filename Fit Font Header Footer Orient Ruler Tab Printer Printfile'=: opt
+opt=. ; dq each '';Printer;Printfile
+if. Orient do.
+  glzorientation 2=Orient
+end.
+glzresolution 300
+SCALE=: (glzqwh 6)%(1440 * glzqwh 2)
+if. prnfile do.
+  glzstartdoc''
+  dirty=. 0
+  while. #PRINTFILES do.
+    PRINTFILE=: 0 pick PRINTFILES
+    PRINTFILES=: }. PRINTFILES
+    if. 0= printinit1`printinit2@.(1=P2UP)'' do.
+      while. #PCMDS do.
+        if. dirty do. glznewpage'' end.
+        bufexe 0 pick PCMDS
+        PCMDS=: }. PCMDS
+        dirty=. 1
       end.
-      return.
+    end.
+  end.
+  glzenddoc''
+else.
+  glzstartdoc''
+  if. 0= printinit1`printinit2@.(1=P2UP)'' do.
+    dirty=. 0
+    while. #PCMDS do.
+      if. dirty do. glznewpage'' end.
+      bufexe 0 pick PCMDS
+      PCMDS=: }. PCMDS
+      dirty=. 1
+    end.
+  end.
+  glzenddoc''
+end.
+codestroy''
+)
+place=: 3 : 0
+
+'just xywh font foreclr dummy lspace txt'=. y
+
+rws=. #txt
+if. 0=rws do. return. end.
+
+if. #font do.
+  vfont font
+end.
+
+vtextcolor foreclr
+'x y width height'=. xywh
+lspace=. {.lspace,1
+
+hite=. 20* lspace*{.glzqtextmetrics''
+
+len=. <.height%hite
+pos=. x,y
+
+rws=. rws <. len
+res=. (<x,y,width,height-hite*rws) , <len }. txt
+txt=. len {. txt
+
+while. #txt do.
+
+  line=. ,0 pick txt
+  txt=. }.txt
+
+  if. 0=#line do.
+    pos=. pos+0,hite
+    continue.
+  end.
+  if. -. 1 e. , E.&line &> TAGS do.
+
+    if. just=0 do.
+      vtextxy rnd0 pos
+      vtext line
+
+    elseif. just=1 do.
+      wid=. 20* {. glzqextent line
+      vtextxy rnd0 pos+(width-wid),0
+      vtext line
+
+    elseif. just=2 do.
+    elseif. just=3 do.
+      wid=. 20* {. glzqextent line
+      vtextxy rnd0 pos+-:(width-wid),0
+      vtext line
+    end.
+  else.
+    'num wid'=. width fitline line
+    vfont TFONT
+    if. just=0 do.
+      placeline pos;line
+
+    elseif. just=1 do.
+
+      placeline (pos+(width-wid),0);line
+
+    elseif. just=2 do.
+      blk=. +/line=' '
+
+      if. (1<blk) *. wid >: width*3r4 do.
+        opt=. (width-wid),blk
+        opt placeline pos;line
+      else.
+        placeline pos;line
+      end.
+
+    elseif. just=3 do.
+      placeline (pos+-:(width-wid),0);line
+
     end.
 
-    wid=. wid-len
-    txt=. ndx}.txt
+  end.
+  pos=. pos+0,hite
 
-    if. (wid <: 0) +. 0 = #txt do. tnum,tlen return. end.
+end.
+
+vtextcolor''
+res
+)
+placeline=: 3 : 0
+0 0 placeline y
+:
+'pos txt'=. y
+'pad blk'=. x
+
+while. #txt do.
+  b=. +./ E.&txt &> TAGS
+  ndx=. b i. 1
+  bit=. ndx{.txt
+  if. blk do.
+    num=. +/bit=' '
+    space=. >.pad*num%blk
+    pad=. pad-space
+    blk=. blk-num
+  else.
+    space=. 0
   end.
 
+  vtextxy rnd0 pos
+  vtext bit
+  pos=. pos + 2{. space + 20* {. glzqextent bit
+
+  txt=. ndx}.txt
+  if. 0=#txt do. break. end.
+
   'tag txt'=. taketag txt
-  tnum=. tnum + #;tag
 
-  TFONT=: TFONT changetag tag
-  glfont TFONT
-
-  if. 0=#txt do. tnum,tlen return. end.
-
+  vfont TFONT changetag tag
   b=. +./ E.&txt &> TAGS
 
 end.
 )
-fitwords=: 4 : 0
+printinit2=: 3 : 0
 
-ndx=. 0, I. (y=' '),1 1
-fit=. {. @ glqextent @ ({.&y) @ ({&ndx)
-max=. _2+#ndx
-avg=. 5{ glqtextmetrics''
-
-try=. max <. 1 i.~ ndx >: x % avg
-
-if. x > len=. fit try do.
-  while.
-    (max > try) *. x >: trylen=. fit >: try
-  do. len=. trylen [ try=. >: try end.
-
-else.
-  while.
-    (0 < try) *. x < len=. fit try
-  do. try=. <: try end.
+if. #PRINTFILE do.
+  Filename=: PRINTFILE , ' ' , (pfsize PRINTFILE) ,' ' , pfstamp PRINTFILE
+  PRINTTXT=: fread PRINTFILE
 end.
 
-(try{ndx) , len
+fascii=. boxascii^:Ascii
 
+vfont Font
+
+HEADER=: > 0 printheader Header ; Filename
+
+'wid len'=. <. 1440* glzqwh 2
+'hite width'=. 20* 0 6 { glzqtextmetrics ''
+
+inlen=. len * 1 - TOPM2 + BOTM2
+rws=. <. inlen % hite * 1.2
+leftm0=. wid * LEFTM2
+leftm1=. leftm0 + -:wid
+ftrow=. len * 1 - FOOTM2
+irws=. (len * TOPM2) + inlen * (i.rws) % rws
+n=. #HEADER
+rws=. rws - n
+
+Cols=: <. width %~ -: wid * 1 - 3*LEFTM2
+RULE=. fascii > printruler Cols
+
+LHDR=: rnd0 leftm0 ,. n {. irws
+RHDR=: rnd0 leftm1 ,. n {. irws
+LTXT=: rnd0 leftm0 ,. n }. irws
+RTXT=: rnd0 leftm1 ,. n }. irws
+LFTR=: rnd0 leftm0 , ftrow
+RFTR=: rnd0 leftm1 , ftrow
+LINE=: rnd0 , (-:wid) ,. len * (1 - TOPM2) , FOOTM2
+
+PAGE=: 0
+foot=: (((Cols - 30) {.!.' ' Footer) , tstamp '')&stamp
+
+dat=. cleanup PRINTTXT
+dat=. fascii dat
+dat=. Tab xtab dat
+dat=. FF cutopen dat
+dat=. Cols fold each ucp each dat
+dat=. ((4 * Ruler) - rws)&(<\) each dat
+TRWS=: rws
+TCLS=: Cols
+TEXT=: > ;dat
+if. Ruler do.
+  TEXT=: RULE ,"2 TEXT
+end.
+print2pages''
+0
 )
-flatten=: 3 : 0
-dat=. ": y
-if. 2 > #$dat do. return. end.
-dat=. 1 1}. _1 _1}. ": <dat
-}: (,|."1 [ 1,.-. *./\"1 |."1 dat=' ')#,dat,.LF
-)
-fold=: 4 : 0
-dat=. toJ y
-dat=. <;._2 dat,LF #~ LF ~: {: dat
-dat=. ({.!.' '~ 1&>.@#) &.> dat
-> ,&.> / (-x) (x&{.) \ &.> dat
-)
-getdevmode=: 3 : 0
-wd 'pc qdevmode'
-wd 'cc g isigraph'
-r=. glqdevmode''
-wd 'pclose'
-r
-)
-getfile=: 3 : 0
-try. {."1 getscripts_j_ y
-catch. <^:(< -: {:@;~) y
+print2pages=: 3 : 0
+bufinit''
+PAGE=: 0
+cmd=. (vtext@[ vtextxy)"1
+while. #TEXT do.
+  mat=. TRWS, TCLS
+  vfont TFONT
+  vpen 5 0
+  vlines LINE
+  if. #HEADER do. HEADER cmd LHDR end.
+  (mat {. {.TEXT) cmd LTXT
+  TEXT=: }.TEXT
+  PAGE=: >:PAGE
+  (foot PAGE) cmd LFTR
+  if. #TEXT do.
+    if. #HEADER do. HEADER cmd LHDR end.
+    (mat {. {.TEXT) cmd RTXT
+    TEXT=: }.TEXT
+    PAGE=: >:PAGE
+    (foot PAGE) cmd RFTR
+  end.
+  vpage''
 end.
 )
-getframe=: 3 : 0
-'px py pw ph j j wid hit'=. ,PRINTPAGE
-'x y w h'=. 1440 * y
-x=. 0 >. x - px
-if. w <: 0 do. w=. wid + w - x + px end.
-w=. w <. pw - x
-y=. 0 >. y - py
-if. h <: 0 do. h=. hit + h - y + py end.
-h=. h <. ph - y
-x,y,w,h
+printn=: 4 : 0
+if. 0 e. $y do. return. end.
+if. 2 <: #$y do. mat=. y
+else. mat=. ];._2 y,LF -. _1{.y
+end.
+cat=. ,&,.&.|:
+txt=. ''
+rws=. 72
+cls=. _2+<. 161 % x
+mat=. '  ' ,"1 ~ cls{."1 mat
+pad=. 10
+while. #mat do.
+  blk=. rws {. mat
+  ndx=. 1 i:~ blk *./ .= ' '
+  if. ndx>rws-pad do. blk=. ndx{.blk end.
+  txt=. txt,<rws{.blk
+  mat=. mat }.~ #blk
+end.
+txt=. _4 (cat each /)\ txt
+txt=. _2 (}."1) each txt
+prn=. ; (,&FF) on  }. on , on (LF&,.) each txt
+font=. P2UPFONT_jprint_
+('land;font ',font) print prn
 )
-getpos=: 3 : 0
-0 getpos y
-:
-'px py pw ph j j wid hit'=. ,PRINTPAGE
-if. x=0 do.
-  'x y'=. 1440 * y
-  if. x >: 0 do.
-    x=. pw <. 0 >. x - px
+printinit1=: 3 : 0
+if. #PRINTFILE do.
+  Filename=: PRINTFILE , ' ' , (pfsize PRINTFILE) ,' ' , pfstamp PRINTFILE
+  PRINTTXT=: fread PRINTFILE
+end.
+
+txt=. cleanup PRINTTXT
+if. 0 e. $txt do. 1 return. end.
+fascii=. boxascii ^: Ascii
+vfont Font
+
+getprintpage''
+'x y width height'=. getframe LEFTM , TOPM , (-RIGHTM) , -FOOTM
+
+HEADER=: > width printheader Header ; Filename
+
+hite=. 20* {.glzqtextmetrics ''
+
+fb=. 1440 * BOTM - FOOTM
+headhite=. hite * #HEADER
+texthite=. height - fb + headhite
+HEADBOX=: x , y , width , headhite
+TEXTBOX=: x , (y + headhite) , width , texthite
+FOOTBOX=: x , (y + height - fb), width , hite
+txt=. fascii txt
+txt=. Tab xtab txt
+if. Fit do. txt=. topara txt end.
+txt=. FF cutopen txt
+TEXT=: width wraptext each txt
+TEXTP=: ''
+if. Ruler do.
+  if. (2 = 3!:0 y) *. 1 < # $y do.
+    cls=. {: $y
   else.
-    x=. 0 >. wid + x - px
+    cls=. >./ ; #&> each TEXT
   end.
-  if. y >: 0 do.
-    y=. 0 >. ph - 0 >. y - py
-  else.
-    y=. ph - 0 >. hit + y - py
-  end.
-  x,y
+  RULE=. fascii each printruler cls
+  RULEBOX=. x , (y + headhite), width , 3 * hite
+  TEXTBOX=. x , (y + headhite + 3 * hite) , width , texthite - 3 * hite
 else.
-  'x y'=. y
-  x=. px + x
-  y=. py + ph - y + h
-  1440 %~ x,y
+  RULE=: RULEBOX=: ''
 end.
+LFTR=: (-.0 e. $Footer) # < ,: ,Footer
+rfoot=: [: < [: ,: (tstamp '')&stamp
+printpages''
+0
 )
-getprintfiles=: 3 : 0
-y=. getfile y
-for_f. y do.
-  try. 1!:1 f
-  catch.
-    empty sminfo 'print' ; 'file not found: ' , >f return.
+printpages=: 3 : 0
+bufinit''
+PAGE=: 0
+while. (#TEXT) + #TEXTP do.
+  PAGE=: >: PAGE
+  if. #TEXTP do.
+    printpage''
+  else.
+    if. #TEXT do.
+      TEXTP=: 0 pick TEXT
+      TEXT=: }.TEXT
+      printpage''
+    end.
   end.
-  PRINTFILES=: PRINTFILES,y
 end.
-PRINTFILE=: 0 pick PRINTFILES
-PRINTFILES=: }. PRINTFILES
-empty ''
+0
 )
-getprintpage=: 3 : 0
-'w h'=. glqprintwh''
-'pw ph mw mh'=. 4 {. glqprintpaper''
-PRINTPAGE=: (mw,mh,w,h),:0 0,pw,ph
-)
-preview=: 3 : 0
-glwindowext (<0;2 3){PRINTPAGE
-wd'pshow'
-glpaint ''
-)
-printers=: }: @ wdqprinters
-removetag=: 3 : 0
-r=. ''
-while. 1 e. b=. +./ E.&y &> TAGS do.
-  ndx=. b i. 1
-  r=. r,ndx{.y
-  y=. ndx}.y
-  y=. (>:y i.'>')}.y
-end.
-r=. r,y
-)
-
-stamp=: 4 : 0
-x,'  Page ',":y
-)
-taketag=: 3 : 0
-tag=. ''
-txt=. y
-while. '<' = 1{.txt do.
-  ind=. >:txt i.'>'
-  tag=. tag,<ind {.txt
-  txt=. ind }. txt
-end.
-tag;txt
-)
-topara=: 3 : 0
-if. 0=#y do. '' return. end.
-if. 1<#$y do. y return. end.
-txt=. toJ y
-b=. txt=LF
-c=. b +. txt=' '
-b=. b > (0,}:b) +. }.c,0
-txt=. ' ' (b#i.#b) } txt
-return.
-b=. b *: 0,}:b=. txt=LF
-txt=. b#txt
-)
-tstamp=: 3 : 0
-y=. <.y,(0=#y)#6!:0 ''
-'y m d h n s'=. 6{.y
-mth=. _3[\'   JanFebMarAprMayJunJulAugSepOctNovDec'
-f=. _2: {. '0'&,@":
-t=. (2":d),(m{mth),(":y),;f&.>h,n,s
-r=. 'xx xxx xxxx xx:xx:xx'
-t (I. r='x') } r
-)
-xtabline=: 4 : 0
-r=. y
-while.
-  i=. >: r i. TAB
-  i <: #r
-do.
-  r=. ((x * >. i % x){.!.' ' }:i{.r) , i}.r
-end.
-)
-xtab=: 4 : 0
-if. -. TAB e. y do. y return. end.
-y=. <;._2 y,(LF ~: {:y)#LF
-b=. TAB e.&> y
-tolist (x xtabline each b#y) (I. b)} y
-)
-wrappara=: 4 : 0
-if. 0=#y do. <a: return. end.
-r=. ''
-txt=. y
-while. #txt do.
-  len=. {.x fitline txt
-  line=. len{.txt
-  txt=. len}.txt
-  txt=. (' '=1{.txt)}.txt
-  r=. r,<line
-end.
-<r
-)
-wraptext=: 4 : 0
-if. 0 e. $y do. '' return. end.
-if. 2=#$y do. ;/y return. end.
-txt=. toJ y
-if. -. LF e. txt do. >x wrappara txt return. end.
-txt=. txt,(LF~:{:txt)#LF
-txt=. ;x&wrappara ;._2 txt
+printpage=: 3 : 0
+vfont TFONT
+place 0 ; HEADBOX ; '' ; '' ; '' ; 1 ; <HEADER
+place 0 ; RULEBOX ; '' ; '' ; '' ; 1 ; <RULE
+'pos p1'=. place 0 ; TEXTBOX ; '' ; '' ; '' ; 1 ; <TEXTP
+place 0 ; FOOTBOX ; '' ; '' ; '' ; 1 ; <LFTR
+place 1 ; FOOTBOX ; '' ; '' ; '' ; 1 ; <rfoot PAGE
+vpage ''
+TEXTP=: p1
 )
 pfsize=: 3 : 0
 }. ;',' , each |. _3 <@|.\ |. ":fsize y
@@ -460,399 +545,331 @@ r=. ''
 if. #hdr do. r=. hdr ; '' end.
 r , (boxxopen fnm) , (boxxopen fnm2) , boxxopen (0 < #fnm) # ' '
 )
-bufinit=: 3 : 0
-PCMDS=: ''
-PCMD=: i.0 2
+qprinter=: 3 : 0
+''
 )
-buf=: 3 : 0
-if. y -: 'page' do.
-  PCMDS=: PCMDS,<PCMD
-  PCMD=: i. 0 2
+TAB=: 9 { a.
+TAGS=: '<b>';'</b>';'<i>';'</i>'
+TAGIDS=: ;:'bold nobold italic noitalic'
+BLACK=: 0
+WHITE=: <:2^24
+
+deb=: #~ (+. 1: |. (> </\))@(' '&~:)
+dlb=: }.~ =&' ' i. 0:
+dltb=: #~ [: (+./\ *. +./\.) ' '&~:
+dtb=: #~ [: +./\. ' '&~:
+round=: [ * [: <. 0.5"_ + %~
+rnd0=: <.@(0.5&+)
+tolist=: }.@;@:(LF&,@,@":&.>)
+boxascii=: 3 : 0
+y=. ": y
+to=. '+++++++++|-'
+fm=. 9!:6 ''
+(to,a.) {~ (fm,a.) i. y
+)
+unibox=: 3 : 0
+fm=. (16+i.11) { a.
+msk=. y e. fm
+if. -. 1 e. msk do. utf8 y return. end.
+to=. 4 u: 9484 9516 9488 9500 9532 9508 9492 9524 9496 9474 9472
+y=. ucp y
+msk=. y e. fm
+un=. to {~ fm i. msk#y
+utf8 un (I.msk) } y
+)
+boxfont=: 3 : 0
+font=. ' ',y
+b=. (font=' ') > ~:/\font='"'
+a: -.~ b <;._1 font
+)
+changefont=: 4 : 0
+font=. ' ',x
+b=. (font=' ') > ~:/\font='"'
+font=. a: -.~ b <;._1 font
+opt=. y
+if. 0=L. opt do. opt=. cutopen ":opt end.
+opt=. a: -.~ (-.&' ' @ ":) each opt
+num=. _1 ~: _1 ". &> opt
+if. 1 e. num do.
+  font=. ({.num#opt) 1} font
+  opt=. (-.num)#opt
+end.
+ayes=. ;:'bold italic'
+noes=. ;:'nobold noitalic'
+font=. font , opt -. noes
+font=. font -. (noes e. opt)#ayes
+}: ; ,&' ' each ~. font
+)
+changetag=: 4 : 0
+x changefont TAGIDS {~ TAGS i. boxopen y
+)
+cleanup=: 3 : 0
+y=. flatten y
+toJ ' ' (I. y e. 27{a.) } y
+)
+cutpara=: 3 : 0
+txt=. topara y
+txt=. txt,(LF ~: {:txt)#LF
+b=. (}.b,0) < b=. txt=LF
+b <;._2 txt
+)
+dq=: 3 : 0
+y=. ": y
+if. '"' ~: {. y do.
+  '"',(y #~ >: y = '"'),'" '
 else.
-  PCMD=: PCMD, y
-end.
-empty''
-)
-bufexe=: 3 : 0
-for_d. y do.
-  'f v'=. d
-  f~v
+  y,' '
 end.
 )
-vfont=: 3 : 0
-glfont TFONT=: y
-buf 'glfont';TFONT
-)
-vlines=: 3 : 0
-buf 'gllines';y
-)
-vpage=: 3 : 0
-buf 'page'
-)
-vpen=: 3 : 0
-buf 'glpen';y
-)
-vtext=: 3 : 0
-buf 'gltext';unibox y
-)
-vtextcolor=: 3 : 0
-if. #y do.
-  clr=. 256 256 256 #: y
+emptymatrix=: ,:`empty @. (0:=#)
+fitchars=: 4 : 0
+
+fit=. *&20 @ {. @ glzqextent @ ({.&y)
+max=. #y
+avg=. 20* 5{ glzqtextmetrics''
+
+try=. max <. >. x % avg
+if. x > fit try do.
+  while.
+    (max > try) *. x >: fit >: try
+  do. try=. >: try end.
 else.
-  clr=. 0 0 0
+  while.
+    (0 < try) *. x < fit try
+  do. try=. <: try end.
 end.
-buf 'glrgb';clr
-buf 'gltextcolor';''
+try, fit try
 )
-vtextxy=: 3 : 0
-buf 'gltextxy';y
-)
-printit=: 4 : 0
-bufinit''
-PRINTFILES=: ''
-PRINTFILE=: ''
-P2UP=: 0
-PRINTOPT=: 0 pick x
-select. 1 pick x
-case. 'print' do.
-  jprint_g_print=: printdo
-  PRINTTXT=: y
-case. 'print2' do.
-  jprint_g_print=: printdo2
-  PRINTTXT=: y
-  P2UP=: 1
-case. 'printfile' do.
-  jprint_g_print=: printdo
-  getprintfiles y
-case. 'printfile2' do.
-  jprint_g_print=: printdo2
-  getprintfiles y
-  P2UP=: 1
-end.
-printform''
-evtloop''
-)
-printclose=: 3 : 0
-wd 'pclose'
-if. #PRINTFILES do.
-  PRINTFILE=: 0 pick PRINTFILES
-  PRINTFILES=: }. PRINTFILES
-  printform''
-else.
-  codestroy''
-end.
-)
-printform=: 3 : 0
-PRINTINIT=: 1
-if. 0 e. $opt=. P2UP printopts PRINTOPT do. 1 return. end.
-'Ascii Cols Filename Fit Font Header Footer Orient Ruler Tab Printer Printfile'=: opt
-wd 'pc jprint;cc g isigraph'
-opt=. ; dq each '';Printer;Printfile
-if. Orient do.
-  opt=. opt,' orientation ',":Orient
-end.
-glprint opt
-)
-prints=: 3 : 0
-'page pass'=. ". sysdata
-if. PRINTINIT do.
-  if. ('printinit',":y)~'' do.
-    printclose'' return.
+fitline=: 4 : 0
+wid=. x
+txt=. y
+b=. +./ E.&txt &> TAGS
+if. -. 1 e. b do.
+  num=. wid fitwords txt
+  if. 0={.num do.
+    num=. wid fitchars txt
   end.
-  PRINTINIT=: 0
+  return.
 end.
-select. pass
-case. _1 do.
-  printclose''
-case. 0 do.
-  glprintmore #PCMDS
-case. 1 do.
-  bufexe 0 pick PCMDS
-  PCMDS=: }. PCMDS
-case. 2 do.
-  wdinfo 'Print';'Printer banding not supported'
-end.
-)
-place=: 3 : 0
+tnum=. tlen=. 0
 
-'just xywh font foreclr dummy lspace txt'=. y
-
-rws=. #txt
-if. 0=rws do. return. end.
-
-if. #font do.
-  vfont font
-end.
-
-vtextcolor foreclr
-'x y width height'=. xywh
-lspace=. {.lspace,1
-
-hite=. lspace*{.glqtextmetrics''
-
-len=. <.height%hite
-pos=. x,y
-
-rws=. rws <. len
-res=. (<x,y,width,height-hite*rws) , <len }. txt
-txt=. len {. txt
-
-while. #txt do.
-
-  line=. ,0 pick txt
-  txt=. }.txt
-
-  if. 0=#line do.
-    pos=. pos+0,hite
-    continue.
-  end.
-  if. -. 1 e. , E.&line &> TAGS do.
-
-    if. just=0 do.
-      vtextxy rnd0 pos
-      vtext line
-
-    elseif. just=1 do.
-      wid=. {. glqextent line
-      vtextxy rnd0 pos+(width-wid),0
-      vtext line
-
-    elseif. just=2 do.
-    elseif. just=3 do.
-      wid=. {. glqextent line
-      vtextxy rnd0 pos+-:(width-wid),0
-      vtext line
-    end.
-  else.
-    'num wid'=. width fitline line
-    vfont TFONT
-    if. just=0 do.
-      placeline pos;line
-
-    elseif. just=1 do.
-
-      placeline (pos+(width-wid),0);line
-
-    elseif. just=2 do.
-      blk=. +/line=' '
-
-      if. (1<blk) *. wid >: width*3r4 do.
-        opt=. (width-wid),blk
-        opt placeline pos;line
-      else.
-        placeline pos;line
-      end.
-
-    elseif. just=3 do.
-      placeline (pos+-:(width-wid),0);line
-
-    end.
-
-  end.
-  pos=. pos+0,hite
-
-end.
-
-vtextcolor''
-res
-)
-placeline=: 3 : 0
-0 0 placeline y
-:
-'pos txt'=. y
-'pad blk'=. x
-
-while. #txt do.
-  b=. +./ E.&txt &> TAGS
+while. 1 do.
   ndx=. b i. 1
-  bit=. ndx{.txt
-  if. blk do.
-    num=. +/bit=' '
-    space=. >.pad*num%blk
-    pad=. pad-space
-    blk=. blk-num
-  else.
-    space=. 0
+
+  if. ndx>0 do.
+    'num len'=. wid fitwords ndx{.txt
+
+    tnum=. tnum + num
+    tlen=. tlen + len
+
+    if. num<ndx do.
+      if. 0=tnum do.
+        wid fitchars txt
+      else.
+        tnum,tlen
+      end.
+      return.
+    end.
+
+    wid=. wid-len
+    txt=. ndx}.txt
+
+    if. (wid <: 0) +. 0 = #txt do. tnum,tlen return. end.
   end.
-
-  vtextxy rnd0 pos
-  vtext bit
-  pos=. pos + 2{. space + {. glqextent bit
-
-  txt=. ndx}.txt
-  if. 0=#txt do. break. end.
 
   'tag txt'=. taketag txt
+  tnum=. tnum + #;tag
 
-  vfont TFONT changetag tag
+  TFONT=: TFONT changetag tag
+  glzfont TFONT
+
+  if. 0=#txt do. tnum,tlen return. end.
+
   b=. +./ E.&txt &> TAGS
 
 end.
 )
-printdo=: prints bind 1
-printinit1=: 3 : 0
+fitwords=: 4 : 0
+ndx=. 0, I. (y=' '),1 1
+fit=. *&20 @ {. @ glzqextent @ ({.&y) @ ({&ndx)
+max=. _2+#ndx
+avg=. 20* 5{ glzqtextmetrics''
 
-if. #PRINTFILE do.
-  Filename=: PRINTFILE , ' ' , (pfsize PRINTFILE) ,' ' , pfstamp PRINTFILE
-  PRINTTXT=: fread PRINTFILE
-end.
+try=. max <. 1 i.~ ndx >: x % avg
 
-txt=. cleanup PRINTTXT
-if. 0 e. $txt do. 1 return. end.
-fascii=. boxascii ^: Ascii
-vfont Font
+if. x > len=. fit try do.
+  while.
+    (max > try) *. x >: trylen=. fit >: try
+  do. len=. trylen [ try=. >: try end.
 
-getprintpage''
-'x y width height'=. getframe LEFTM , TOPM , (-RIGHTM) , -FOOTM
-
-HEADER=: > width printheader Header ; Filename
-hite=. {.glqtextmetrics ''
-
-fb=. 1440 * BOTM - FOOTM
-headhite=. hite * #HEADER
-texthite=. height - fb + headhite
-HEADBOX=: x , y , width , headhite
-TEXTBOX=: x , (y + headhite) , width , texthite
-FOOTBOX=: x , (y + height - fb), width , hite
-txt=. fascii txt
-txt=. Tab xtab txt
-if. Fit do. txt=. topara txt end.
-txt=. FF cutopen txt
-TEXT=: width wraptext each txt
-TEXTP=: ''
-if. Ruler do.
-  if. (2 = 3!:0 y) *. 1 < # $y do.
-    cls=. {: $y
-  else.
-    cls=. >./ ; #&> each TEXT
-  end.
-  RULE=. fascii each printruler cls
-  RULEBOX=. x , (y + headhite), width , 3 * hite
-  TEXTBOX=. x , (y + headhite + 3 * hite) , width , texthite - 3 * hite
 else.
-  RULE=: RULEBOX=: ''
+  while.
+    (max > try) *. x >: trylen=. fit >: try
+    (0 < try) *. x < len=. fit try
+  do. try=. <: try end.
 end.
-LFTR=: (-.0 e. $Footer) # < ,: ,Footer
-rfoot=: [: < [: ,: (tstamp '')&stamp
-printpages''
-0
+(try{ndx) , len
+
 )
-printpages=: 3 : 0
-bufinit''
-PAGE=: 0
-while. (#TEXT) + #TEXTP do.
-  PAGE=: >: PAGE
-  if. #TEXTP do.
-    printpage''
+flatten=: 3 : 0
+dat=. ": y
+if. 2 > #$dat do. return. end.
+dat=. 1 1}. _1 _1}. ": <dat
+}: (,|."1 [ 1,.-. *./\"1 |."1 dat=' ')#,dat,.LF
+)
+fold=: 4 : 0
+dat=. toJ y
+dat=. <;._2 dat,LF #~ LF ~: {: dat
+dat=. ({.!.' '~ 1&>.@#) &.> dat
+> ,&.> / (-x) (x&{.) \ &.> dat
+)
+getdevmode=: 3 : 0
+''
+)
+getfile=: 3 : 0
+try. {."1 getscripts_j_ y
+catch. <^:(< -: {:@;~) y
+end.
+)
+getframe=: 3 : 0
+'px py pw ph j j wid hit'=. ,PRINTPAGE
+'x y w h'=. 1440 * y
+x=. 0 >. x - px
+if. w <: 0 do. w=. wid + w - x + px end.
+w=. w <. pw - x
+y=. 0 >. y - py
+if. h <: 0 do. h=. hit + h - y + py end.
+h=. h <. ph - y
+x,y,w,h
+)
+getpos=: 3 : 0
+0 getpos y
+:
+'px py pw ph j j wid hit'=. ,PRINTPAGE
+if. x=0 do.
+  'x y'=. 1440 * y
+  if. x >: 0 do.
+    x=. pw <. 0 >. x - px
   else.
-    if. #TEXT do.
-      TEXTP=: 0 pick TEXT
-      TEXT=: }.TEXT
-      printpage''
-    end.
+    x=. 0 >. wid + x - px
   end.
-end.
-0
-)
-printpage=: 3 : 0
-vfont TFONT
-place 0 ; HEADBOX ; '' ; '' ; '' ; 1 ; <HEADER
-place 0 ; RULEBOX ; '' ; '' ; '' ; 1 ; <RULE
-'pos p1'=. place 0 ; TEXTBOX ; '' ; '' ; '' ; 1 ; <TEXTP
-place 0 ; FOOTBOX ; '' ; '' ; '' ; 1 ; <LFTR
-place 1 ; FOOTBOX ; '' ; '' ; '' ; 1 ; <rfoot PAGE
-vpage ''
-TEXTP=: p1
-)
-printdo2=: prints bind '2'
-printinit2=: 3 : 0
-
-if. #PRINTFILE do.
-  Filename=: PRINTFILE , ' ' , (pfsize PRINTFILE) ,' ' , pfstamp PRINTFILE
-  PRINTTXT=: fread PRINTFILE
-end.
-
-fascii=. boxascii^:Ascii
-
-vfont Font
-
-HEADER=: > 0 printheader Header ; Filename
-
-'wid len'=. glqprintwh''
-'hite width'=. 0 6 { glqtextmetrics ''
-
-inlen=. len * 1 - TOPM2 + BOTM2
-rws=. <. inlen % hite * 1.2
-leftm0=. wid * LEFTM2
-leftm1=. leftm0 + -:wid
-ftrow=. len * 1 - FOOTM2
-irws=. (len * TOPM2) + inlen * (i.rws) % rws
-n=. #HEADER
-rws=. rws - n
-
-Cols=: <. width %~ -: wid * 1 - 3*LEFTM2
-RULE=. fascii > printruler Cols
-
-LHDR=: rnd0 leftm0 ,. n {. irws
-RHDR=: rnd0 leftm1 ,. n {. irws
-LTXT=: rnd0 leftm0 ,. n }. irws
-RTXT=: rnd0 leftm1 ,. n }. irws
-LFTR=: rnd0 leftm0 , ftrow
-RFTR=: rnd0 leftm1 , ftrow
-LINE=: rnd0 , (-:wid) ,. len * (1 - TOPM2) , FOOTM2
-
-PAGE=: 0
-foot=: (((Cols - 30) {.!.' ' Footer) , tstamp '')&stamp
-
-dat=. cleanup PRINTTXT
-dat=. fascii dat
-dat=. Tab xtab dat
-dat=. FF cutopen dat
-dat=. Cols fold each ucp each dat
-dat=. ((4 * Ruler) - rws)&(<\) each dat
-TRWS=: rws
-TCLS=: Cols
-TEXT=: > ;dat
-if. Ruler do.
-  TEXT=: RULE ,"2 TEXT
-end.
-print2pages''
-0
-)
-print2pages=: 3 : 0
-bufinit''
-PAGE=: 0
-cmd=. (vtext@[ vtextxy)"1
-while. #TEXT do.
-  mat=. TRWS, TCLS
-  vfont TFONT
-  vpen 5 0
-  vlines LINE
-  if. #HEADER do. HEADER cmd LHDR end.
-  (mat {. {.TEXT) cmd LTXT
-  TEXT=: }.TEXT
-  PAGE=: >:PAGE
-  (foot PAGE) cmd LFTR
-  if. #TEXT do.
-    if. #HEADER do. HEADER cmd LHDR end.
-    (mat {. {.TEXT) cmd RTXT
-    TEXT=: }.TEXT
-    PAGE=: >:PAGE
-    (foot PAGE) cmd RFTR
+  if. y >: 0 do.
+    y=. 0 >. ph - 0 >. y - py
+  else.
+    y=. ph - 0 >. hit + y - py
   end.
-  vpage''
+  x,y
+else.
+  'x y'=. y
+  x=. px + x
+  y=. py + ph - y + h
+  1440 %~ x,y
 end.
 )
-qprinter=: 3 : 0
-wd 'pc qprinter;cc g isigraph;cc e edit;set e *',y
-glprint ''
+getprintfiles=: 3 : 0
+y=. getfile y
+for_f. y do.
+  try. 1!:1 f
+  catch.
+    empty sminfo 'print' ; 'file not found: ' , >f return.
+  end.
+  PRINTFILES=: PRINTFILES,y
+end.
+PRINTFILE=: 0 pick PRINTFILES
+PRINTFILES=: }. PRINTFILES
+empty ''
 )
-qprinter_g_print=: 3 : 0
-v=. > 1 { (({."1 wdq) i. <,'e') { wdq
-p=. glqprintwh''
-m=. 4{.glqprintpaper''
-wd 'pclose'
-v~p;m
+getprintpage=: 3 : 0
+'w h'=. <. 1440 * glzqwh 2
+'l t r b'=. <. 1440 * glzqmargins 2
+PRINTPAGE=: (l,t,(w-l+r),(h-t+b)),:0 0,w,h
+)
+preview=: 3 : 0
+glwindowext (<0;2 3){PRINTPAGE
+wd'pshow'
+glpaint ''
+)
+printers=: }: @ wdqprinters
+removetag=: 3 : 0
+r=. ''
+while. 1 e. b=. +./ E.&y &> TAGS do.
+  ndx=. b i. 1
+  r=. r,ndx{.y
+  y=. ndx}.y
+  y=. (>:y i.'>')}.y
+end.
+r=. r,y
+)
+
+stamp=: 4 : 0
+x,'  Page ',":y
+)
+taketag=: 3 : 0
+tag=. ''
+txt=. y
+while. '<' = 1{.txt do.
+  ind=. >:txt i.'>'
+  tag=. tag,<ind {.txt
+  txt=. ind }. txt
+end.
+tag;txt
+)
+topara=: 3 : 0
+if. 0=#y do. '' return. end.
+if. 1<#$y do. y return. end.
+txt=. toJ y
+b=. txt=LF
+c=. b +. txt=' '
+b=. b > (0,}:b) +. }.c,0
+txt=. ' ' (b#i.#b) } txt
+return.
+b=. b *: 0,}:b=. txt=LF
+txt=. b#txt
+)
+tstamp=: 3 : 0
+y=. <.y,(0=#y)#6!:0 ''
+'y m d h n s'=. 6{.y
+mth=. _3[\'   JanFebMarAprMayJunJulAugSepOctNovDec'
+f=. _2: {. '0'&,@":
+t=. (2":d),(m{mth),(":y),;f&.>h,n,s
+r=. 'xx xxx xxxx xx:xx:xx'
+t (I. r='x') } r
+)
+xtabline=: 4 : 0
+r=. y
+while.
+  i=. >: r i. TAB
+  i <: #r
+do.
+  r=. ((x * >. i % x){.!.' ' }:i{.r) , i}.r
+end.
+)
+xtab=: 4 : 0
+if. -. TAB e. y do. y return. end.
+y=. <;._2 y,(LF ~: {:y)#LF
+b=. TAB e.&> y
+tolist (x xtabline each b#y) (I. b)} y
+)
+wrappara=: 4 : 0
+if. 0=#y do. <a: return. end.
+r=. ''
+txt=. y
+while. #txt do.
+  len=. {.x fitline txt
+  line=. len{.txt
+  txt=. len}.txt
+  txt=. (' '=1{.txt)}.txt
+  r=. r,<line
+end.
+<r
+)
+wraptext=: 4 : 0
+if. 0 e. $y do. '' return. end.
+if. 2=#$y do. ;/y return. end.
+txt=. toJ y
+if. -. LF e. txt do. >x wrappara txt return. end.
+txt=. txt,(LF~:{:txt)#LF
+txt=. ;x&wrappara ;._2 txt
 )
 doprint=: 1 : 0
 cocurrent conew 'jprint'
@@ -865,7 +882,3 @@ print=: 'print' doprint
 print2=: 'print2' doprint
 printfile=: 'printfile' doprint
 printfile2=: 'printfile2' doprint
-print_z_=: print_jprint_
-printfile_z_=: printfile_jprint_
-print2_z_=: print2_jprint_
-printfile2_z_=: printfile2_jprint_

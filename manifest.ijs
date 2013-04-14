@@ -6,14 +6,13 @@ DESCRIPTION=: 0 : 0
 print text files
 )
 
-VERSION=: '1.0.4'
+VERSION=: '1.0.5'
 
-RELEASE=: 'j701'
+RELEASE=: 'j801'
 
 FILES=: 0 : 0
 history.txt
 print.ijs
-print.txt
 printfns.txt
-printn.ijs
+writefns.txt
 )
