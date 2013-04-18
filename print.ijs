@@ -624,7 +624,7 @@ end.
 emptymatrix=: ,:`empty @. (0:=#)
 fitchars=: 4 : 0
 
-fit=. *&20 @ {. @ glzqextent @ ({.&y)
+fit=. *&5r6 @ *&20 @ {. @ glzqextent @ ({.&y)
 max=. #y
 avg=. 20* 5{ glzqtextmetrics''
 
@@ -691,7 +691,7 @@ end.
 )
 fitwords=: 4 : 0
 ndx=. 0, I. (y=' '),1 1
-fit=. *&20 @ {. @ glzqextent @ ({.&y) @ ({&ndx)
+fit=. *&5r6 @ *&20 @ glzqextent @ ({.&y) @ ({&ndx)
 max=. _2+#ndx
 avg=. 20* 5{ glzqtextmetrics''
 
@@ -704,7 +704,6 @@ if. x > len=. fit try do.
 
 else.
   while.
-    (max > try) *. x >: trylen=. fit >: try
     (0 < try) *. x < len=. fit try
   do. try=. <: try end.
 end.
@@ -735,10 +734,10 @@ getframe=: 3 : 0
 'px py pw ph j j wid hit'=. ,PRINTPAGE
 'x y w h'=. 1440 * y
 x=. 0 >. x - px
-if. w <: 0 do. w=. wid + w - x + px end.
+if. w <: 0 do. w=. wid + w - 0 >. x - px end.
 w=. w <. pw - x
 y=. 0 >. y - py
-if. h <: 0 do. h=. hit + h - y + py end.
+if. h <: 0 do. h=. hit + h - 0 >. y - py end.
 h=. h <. ph - y
 x,y,w,h
 )
