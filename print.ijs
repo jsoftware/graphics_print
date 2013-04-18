@@ -393,9 +393,9 @@ if. Ruler do.
   else.
     cls=. >./ ; #&> each TEXT
   end.
-  RULE=. fascii each printruler cls
-  RULEBOX=. x , (y + headhite), width , 3 * hite
-  TEXTBOX=. x , (y + headhite + 3 * hite) , width , texthite - 3 * hite
+  RULE=: fascii each printruler cls
+  RULEBOX=: x , (y + headhite), width , 3 * hite
+  TEXTBOX=: x , (y + headhite + 3 * hite) , width , texthite - 3 * hite
 else.
   RULE=: RULEBOX=: ''
 end.
@@ -775,8 +775,6 @@ for_f. y do.
   end.
   PRINTFILES=: PRINTFILES,y
 end.
-PRINTFILE=: 0 pick PRINTFILES
-PRINTFILES=: }. PRINTFILES
 empty ''
 )
 getprintpage=: 3 : 0
