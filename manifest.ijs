@@ -6,7 +6,7 @@ DESCRIPTION=: 0 : 0
 print text files
 )
 
-VERSION=: '1.0.7'
+VERSION=: '1.0.8'
 
 RELEASE=: 'j801'
 

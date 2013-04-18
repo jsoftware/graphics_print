@@ -691,7 +691,7 @@ end.
 )
 fitwords=: 4 : 0
 ndx=. 0, I. (y=' '),1 1
-fit=. *&5r6 @ *&20 @ glzqextent @ ({.&y) @ ({&ndx)
+fit=. *&5r6 @ *&20 @ {. @ glzqextent @ ({.&y) @ ({&ndx)
 max=. _2+#ndx
 avg=. 20* 5{ glzqtextmetrics''
 
