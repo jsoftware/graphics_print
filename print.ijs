@@ -4,11 +4,11 @@ coclass 'jprint'
 coinsert 'qtprinter'
 
 PATHSEP=: '/'
-PRINTERFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 12' ; '"Lucida Grande" 12' ; (IFQT{::'Serif 12';'"Droid Serif" 12') ; 'Courier New 12'
-P2UPFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7.5 bold' ; '"Lucida Grande" 7.5 bold' ; (IFQT{::'Serif 7.5 bold';'"Droid Serif" 7.5 bold') ; 'Courier New 7.5 bold'
+PRINTERFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 12' ; '"Lucida Grande" 12' ; (IFQT{::'Serif 12';'"Droid Serif" 12') ; '"Courier New" 12'
+P2UPFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7.5 bold' ; '"Lucida Grande" 7.5 bold' ; (IFQT{::'Serif 7.5 bold';'"Droid Serif" 7.5 bold') ; '"Courier New" 7.5 bold'
 PRINTOPT=: ''
-DEFFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 10 bold' ; '"Lucida Grande" 10 bold' ; (IFQT{::'Serif 10 bold';'"Droid Serif" 10 bold') ; 'Courier New 10 bold'
-DEFFONT2=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7 bold' ; '"Lucida Grande" 7 bold' ; (IFQT{::'Serif 7 bold';'"Droid Serif" 7 bold') ; 'Courier New 7 bold'
+DEFFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 10 bold' ; '"Lucida Grande" 10 bold' ; (IFQT{::'Serif 10 bold';'"Droid Serif" 10 bold') ; '"Courier New" 10 bold'
+DEFFONT2=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7 bold' ; '"Lucida Grande" 7 bold' ; (IFQT{::'Serif 7 bold';'"Droid Serif" 7 bold') ; '"Courier New" 7 bold'
 TOPM=: 0.4
 BOTM=: 0.75
 FOOTM=: 0.4
@@ -20,6 +20,8 @@ LEFTM2=: 0.015
 FOOTM2=: 0.015
 SCALE=: 1 1
 OFFSET=: 0 0
+CF=: 1
+CFFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Monospace 12' ; 'Monaco 12' ; (IFQT{::'monospace 12';'"Droid Sans Mono" 12') ; '"Lucida Console" 12'
 bufinit=: 3 : 0
 PCMDS=: ''
 PCMD=: i.0 2
@@ -106,10 +108,10 @@ opt=. ; dq each '';Printer;Printfile
 if. Orient do.
   glzorientation 2=Orient
 end.
-glzresolution 300
 SCALE=: (glzqwh 6)%(1440 * glzqwh 2)
 if. prnfile do.
   glzstartdoc''
+  getcf''
   dirty=. 0
   while. #PRINTFILES do.
     PRINTFILE=: 0 pick PRINTFILES
@@ -126,6 +128,7 @@ if. prnfile do.
   glzenddoc''
 else.
   glzstartdoc''
+  getcf''
   if. 0= printinit1`printinit2@.(1=P2UP)'' do.
     dirty=. 0
     while. #PCMDS do.
@@ -624,7 +627,7 @@ end.
 emptymatrix=: ,:`empty @. (0:=#)
 fitchars=: 4 : 0
 
-fit=. *&5r6 @ *&20 @ {. @ glzqextent @ ({.&y)
+fit=. *&CF @ *&20 @ {. @ glzqextent @ ({.&y)
 max=. #y
 avg=. 20* 5{ glzqtextmetrics''
 
@@ -691,7 +694,7 @@ end.
 )
 fitwords=: 4 : 0
 ndx=. 0, I. (y=' '),1 1
-fit=. *&5r6 @ *&20 @ {. @ glzqextent @ ({.&y) @ ({&ndx)
+fit=. *&CF @ *&20 @ {. @ glzqextent @ ({.&y) @ ({&ndx)
 max=. _2+#ndx
 avg=. 20* 5{ glzqtextmetrics''
 
@@ -867,6 +870,11 @@ txt=. toJ y
 if. -. LF e. txt do. >x wrappara txt return. end.
 txt=. txt,(LF~:{:txt)#LF
 txt=. ;x&wrappara ;._2 txt
+)
+
+getcf=: 3 : 0
+glzfont CFFONT
+CF=: 72% {. glzqextent 10#'m'
 )
 doprint=: 1 : 0
 cocurrent conew 'jprint'
