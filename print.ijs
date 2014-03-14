@@ -1,5 +1,3 @@
-require 'ide/qt'
-
 coclass 'jprint'
 coinsert 'qtprinter'
 
