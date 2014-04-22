@@ -6,9 +6,9 @@ DESCRIPTION=: 0 : 0
 print text files
 )
 
-VERSION=: '1.0.09'
+VERSION=: '1.0.10'
 
-RELEASE=: 'j801'
+RELEASE=: 'j802'
 
 FILES=: 0 : 0
 history.txt
