@@ -16,4 +16,3 @@ print.ijs
 printfns.txt
 writefns.txt
 )
-PLATFORMS=: 'linux win darwin android'
