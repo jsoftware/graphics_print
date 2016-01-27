@@ -1,5 +1,5 @@
 coclass 'jprint'
-coinsert 'qtprinter'
+coinsert^:IFQT 'qtprinter'
 
 PATHSEP=: '/'
 PRINTERFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 12' ; '"Lucida Grande" 12' ; (IFQT{::'Serif 12';'"Droid Serif" 12') ; '"Courier New" 12'
