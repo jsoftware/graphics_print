@@ -1,5 +1,5 @@
 print.ijs        - print utilities
-	
+
 These verbs can be used to print text or text files.
 
 main verbs:
