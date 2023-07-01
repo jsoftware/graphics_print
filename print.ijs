@@ -2,11 +2,11 @@ coclass 'jprint'
 coinsert^:IFQT 'qtprinter'
 
 PATHSEP=: '/'
-PRINTERFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 12' ; '"Lucida Grande" 12' ; (IFQT{::'Serif 12';'"Droid Serif" 12') ; '"Courier New" 12'
-P2UPFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7.5 bold' ; '"Lucida Grande" 7.5 bold' ; (IFQT{::'Serif 7.5 bold';'"Droid Serif" 7.5 bold') ; '"Courier New" 7.5 bold'
+PRINTERFONT=: (('Linux';'FreeBSD';'OpenBSD';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 12' ; 'Serif 12' ; 'Serif 12' ; '"Lucida Grande" 12' ; (IFQT{::'Serif 12';'"Droid Serif" 12') ; '"Courier New" 12'
+P2UPFONT=: (('Linux';'FreeBSD';'OpenBSD';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7.5 bold' ; 'Serif 7.5 bold' ; 'Serif 7.5 bold' ; '"Lucida Grande" 7.5 bold' ; (IFQT{::'Serif 7.5 bold';'"Droid Serif" 7.5 bold') ; '"Courier New" 7.5 bold'
 PRINTOPT=: ''
-DEFFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 10 bold' ; '"Lucida Grande" 10 bold' ; (IFQT{::'Serif 10 bold';'"Droid Serif" 10 bold') ; '"Courier New" 10 bold'
-DEFFONT2=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7 bold' ; '"Lucida Grande" 7 bold' ; (IFQT{::'Serif 7 bold';'"Droid Serif" 7 bold') ; '"Courier New" 7 bold'
+DEFFONT=: (('Linux';'FreeBSD';'OpenBSD';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 10 bold' ; 'Serif 10 bold' ; 'Serif 10 bold' ; '"Lucida Grande" 10 bold' ; (IFQT{::'Serif 10 bold';'"Droid Serif" 10 bold') ; '"Courier New" 10 bold'
+DEFFONT2=: (('Linux';'FreeBSD';'OpenBSD';'Darwin';'Android';'Win') i. <UNAME){:: 'Serif 7 bold' ; 'Serif 7 bold' ; 'Serif 7 bold' ; '"Lucida Grande" 7 bold' ; (IFQT{::'Serif 7 bold';'"Droid Serif" 7 bold') ; '"Courier New" 7 bold'
 TOPM=: 0.4
 BOTM=: 0.75
 FOOTM=: 0.4
@@ -19,7 +19,7 @@ FOOTM2=: 0.015
 SCALE=: 1 1
 OFFSET=: 0 0
 CF=: 1
-CFFONT=: (('Linux';'Darwin';'Android';'Win') i. <UNAME){:: 'Monospace 12' ; 'Monaco 12' ; (IFQT{::'monospace 12';'"Droid Sans Mono" 12') ; '"Lucida Console" 12'
+CFFONT=: (('Linux';'FreeBSD';'OpenBSD';'Darwin';'Android';'Win') i. <UNAME){:: 'Monospace 12' ; 'Monospace 12' ; 'Monospace 12' ; 'Monaco 12' ; (IFQT{::'monospace 12';'"Droid Sans Mono" 12') ; '"Lucida Console" 12'
 bufinit=: 3 : 0
 PCMDS=: ''
 PCMD=: i.0 2
